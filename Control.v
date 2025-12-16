@@ -248,12 +248,6 @@ always @(posedge clk) begin
         end
     end
 end 
-
-       
-
-
-        
-
     // TODO - control 7-segments tube display mode here 
  
 //////////////////////////////////////////////////////////////////////////////
@@ -304,11 +298,16 @@ always @(posedge clk) begin
                 led0 <= 1'b0;
             end 
             STATE_PENDING: begin
-                led0 <= 1'b1;
+                led0 <= 1'b0;
             end 
             STATE_RUNNING: begin
+                if(ms_tick && (blink_ms == 9'd500)) begin
+                    led0 <= ~led0;
+                end
+                else begin
                 led0 <= 1'b1;
-            end 
+                end 
+            end
             STATE_DONE: begin
                 led0 <= 1'b1;
             end 
@@ -316,8 +315,6 @@ always @(posedge clk) begin
                 led0 <= 1'b0;
             end
         endcase
-
-        
     end
 end
 
@@ -328,6 +325,27 @@ end
 //////////////////////////////////////////////////////////////////////////////
 reg [5:0] peak_led = 6'b0; // peak number indicator
 // TODO - implement peak-1~6 indicators logic here
+always @(posedge clk) begin
+    if(~rstn)begin//复位
+        peak_led<=6'b000_000;
+    end
+    else begin
+        if(current_state==STATE_DONE)begin
+            case(detect_peak_num)
+                3'd0: peak_led<=6'b000_000;
+                3'd1: peak_led<=6'b000_001;
+                3'd2: peak_led<=6'b000_011;
+                3'd3: peak_led<=6'b000_111;
+                3'd4: peak_led<=6'b001_111;
+                3'd5: peak_led<=6'b011_111;
+                3'd6: peak_led<=6'b111_111;
+                default: peak_led<=6'b000_000;
+            endcase
+
+        end
+
+    end
+end
 //////////////////////////////////////////////////////////////////////////////
 
 
